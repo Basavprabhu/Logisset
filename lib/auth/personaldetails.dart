@@ -40,50 +40,125 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Personal Details')),
+      appBar: AppBar(
+        title: Center(child: Text('Personal Details')),
+        backgroundColor: Colors.redAccent,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(labelText: 'First Name'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _firstNameController,
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(labelText: 'Last Name'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _lastNameController,
+                decoration: InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: AbsorbPointer(
-                child: TextField(
-                  controller: TextEditingController(
-                      text: _selectedDate != null
-                          ? _selectedDate!.toLocal().toString().split(' ')[0]
-                          : ''),
-                  decoration: InputDecoration(labelText: 'Date of Birth'),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: TextField(
+                    controller: TextEditingController(
+                        text: _selectedDate != null
+                            ? _selectedDate!.toLocal().toString().split(' ')[0]
+                            : ''),
+                    decoration: InputDecoration(
+                      labelText: 'Date of Birth',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
-            TextField(
-              controller: _genderController,
-              decoration: InputDecoration(labelText: 'Gender'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: DropdownButtonFormField<String>(
+                value: _genderController.text.isEmpty
+                    ? null
+                    : _genderController.text,
+                onChanged: (newValue) {
+                  setState(() {
+                    _genderController.text = newValue!;
+                  });
+                },
+                items: <String>['Man', 'Woman', 'Others']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Gender',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
-            TextField(
-              controller: _departmentController,
-              decoration: InputDecoration(labelText: 'Department'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _semesterController,
+                decoration: InputDecoration(
+                  labelText: 'Qualification',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
-            TextField(
-              controller: _usnController,
-              decoration: InputDecoration(labelText: 'USN'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _departmentController,
+                decoration: InputDecoration(
+                  labelText: 'Department',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
-            TextField(
-              controller: _semesterController,
-              decoration: InputDecoration(labelText: 'Current Semester'),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _usnController,
+                decoration: InputDecoration(
+                  labelText: 'Lab',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
             ),
             CheckboxListTile(
-              title: Text('I agree to all terms and conditions'),
+              title: Text(
+                'I agree to all terms and conditions.',
+              ),
               value: _agreeToTerms,
               onChanged: (value) {
                 setState(() {
@@ -92,6 +167,11 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
               },
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.redAccent, // Use red accent color
+                onPrimary: Colors.white, // Text color
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
               onPressed: () async {
                 if (_agreeToTerms) {
                   await FirebaseFirestore.instance

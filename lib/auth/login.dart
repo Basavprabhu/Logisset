@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logisset/Screens/homepage.dart';
 import 'package:logisset/Screens/navbar.dart';
+import 'package:logisset/Screens/studentnavbar.dart';
 import 'package:logisset/Screens/studentpage.dart';
 import 'package:logisset/auth/register.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         } else if (role == 'student') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => StudentPage()),
+            MaterialPageRoute(builder: (context) => StudentMainPageView()),
           );
         } else {
           _showErrorDialog('Invalid Role',
@@ -91,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 0),
                 child: Container(
-                  height: 75,
+                  height: 69,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -233,7 +234,8 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
               ),
-              SizedBox(height: 10),
+
+              // SizedBox(height: 10),
               TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -250,8 +252,16 @@ class _LoginPageState extends State<LoginPage> {
                     // Apply Roboto font
                   ),
                 ),
-                style: TextButton.styleFrom(
-                  textStyle: TextStyle(color: Colors.blue), // Text color
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, bottom: 20, top: 80),
+                child: Center(
+                  child: Text('terms and conditions.@all rights are reserved',
+                      style: GoogleFonts.merriweather(
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 169, 169, 170),
+                          fontSize: 8)),
                 ),
               ),
             ],

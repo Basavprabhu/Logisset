@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logisset/Screens/navbar.dart';
+import 'package:logisset/Screens/studentnavbar.dart';
 import 'package:logisset/auth/register.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -98,7 +99,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Your App Title',
+      title: 'Logisset',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -131,7 +132,7 @@ class AuthenticationWrapper extends StatelessWidget {
               if (role == 'admin' && user.emailVerified) {
                 return MainPageView();
               } else if (role == 'student') {
-                return StudentPage();
+                return StudentMainPageView();
               } else {
                 return LoginPage();
               }

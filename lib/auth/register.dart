@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logisset/auth/personaldetails.dart';
 
 import 'login.dart';
@@ -82,11 +83,10 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _showSecurityPopupDialog() async {
     final TextEditingController _securityKeyController =
         TextEditingController();
-
-    final currentContext = context; // Store the context
+    final currentContext = context;
 
     await showDialog<void>(
-      context: currentContext, // Use the stored context
+      context: currentContext,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -106,68 +106,87 @@ class _RegisterPageState extends State<RegisterPage> {
                 TextButton(
                   child: Text('Verify'),
                   onPressed: () async {
-                    if (_securityKeyController.text == 'basavprabhu') {
-                      Navigator.of(context).pop();
+                    DocumentReference securityKeyRef = FirebaseFirestore
+                        .instance
+                        .collection('security_key')
+                        .doc('hCOutaykpYUP8xr9buQp');
 
-                      try {
-                        UserCredential userCredential = await FirebaseAuth
-                            .instance
-                            .createUserWithEmailAndPassword(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        );
-                        String userId = userCredential.user!.uid;
+                    try {
+                      DocumentSnapshot snapshot = await securityKeyRef.get();
+                      if (snapshot.exists) {
+                        String storedSecurityKey = snapshot.get('security_key');
+                        String enteredSecurityKey = _securityKeyController.text;
 
-                        await _auth.currentUser!.sendEmailVerification();
+                        if (enteredSecurityKey == storedSecurityKey) {
+                          Navigator.of(context).pop();
 
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(userId)
-                            .set({
-                          'role': 'admin',
-                        });
+                          // Authentication and navigation logic
+                          try {
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .createUserWithEmailAndPassword(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+                            String userId = userCredential.user!.uid;
 
-                        Navigator.pushReplacement(
-                          currentContext,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  PersonalDetailsPage(userId)),
-                        );
-                      } catch (e) {
-                        showDialog(
-                          context: currentContext,
-                          builder: (context) => AlertDialog(
-                            title: Text('Error'),
-                            content: Text('An error occurred: $e'),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
+                            await _auth.currentUser!.sendEmailVerification();
+
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userId)
+                                .set({
+                              'role': 'admin',
+                            });
+
+                            Navigator.pushReplacement(
+                              currentContext,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PersonalDetailsPage(userId),
                               ),
-                            ],
-                          ),
-                        );
-                      }
-                    } else {
-                      showDialog(
-                        context: currentContext,
-                        builder: (context) => AlertDialog(
-                          title: Text('Unauthorized'),
-                          content: Text('You are not authorized.'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Try Again'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                _securityKeyController.clear();
-                                _showSecurityPopupDialog();
-                              },
+                            );
+                          } catch (e) {
+                            showDialog(
+                              context: currentContext,
+                              builder: (context) => AlertDialog(
+                                title: Text('Error'),
+                                content: Text('An error occurred: $e'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        } else {
+                          showDialog(
+                            context: currentContext,
+                            builder: (context) => AlertDialog(
+                              title: Text('Unauthorized'),
+                              content: Text('You are not authorized.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Try Again'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _securityKeyController.clear();
+                                    _showSecurityPopupDialog();
+                                  },
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
+                          );
+                        }
+                      } else {
+                        // Handle document not found
+                      }
+                    } catch (e) {
+                      // Handle error while fetching data
                     }
                   },
                 ),
@@ -238,106 +257,179 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                // suffixIcon: _isVerifyingEmail
-                //     ? CircularProgressIndicator()
-                //     : _isEmailVerified
-                //         ? Icon(Icons.check_circle, color: Colors.green)
-                //         : Icon(Icons.error_outline, color: Colors.red),
-                // helperText: _isVerifyingEmail
-                //     ? 'Sending verification email...'
-                //     : _isEmailVerified
-                //         ? 'Email verified'
-                //         : 'Email not verified',
-                // helperStyle: TextStyle(
-                //   color: _isEmailVerified ? Colors.green : Colors.red,
-                // ),
-              ),
-              // onChanged: (email) {
-              //   setState(() {
-              //     _isEmailVerified = false;
-              //   });
-              // },
-            ),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              onChanged: _checkPasswordStrength,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                suffixIcon: _passwordController.text.isNotEmpty
-                    ? Icon(
-                        _isPasswordStrong
-                            ? Icons.check_circle
-                            : Icons.error_outline,
-                        color: _isPasswordStrong ? Colors.green : Colors.red,
-                      )
-                    : null,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Are you an admin?'),
-                Checkbox(
-                  value: _isAdmin,
-                  onChanged: (value) {
-                    setState(() {
-                      _isAdmin = value!;
-                    });
-                  },
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            'REGISTER',
+            style: GoogleFonts.kanit(
+                fontSize: 25, color: Colors.black, fontWeight: FontWeight.w400),
+          ),
+        ),
+        backgroundColor: Colors.redAccent,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.redAccent,
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Text('LOGISSET APP',
+                        style: GoogleFonts.merriweather(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            fontSize: 20)),
+                  ),
                 ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_isAdmin) {
-                  _showSecurityPopupDialog();
-                } else {
-                  if (_isPasswordStrong) {
-                    final email = _emailController.text;
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: Text('You can login as Admin or Student',
+                      style: GoogleFonts.merriweather(
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 180, 176, 176),
+                          fontSize: 13)),
+                ),
+              ),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  // suffixIcon: _isVerifyingEmail
+                  //     ? CircularProgressIndicator()
+                  //     : _isEmailVerified
+                  //         ? Icon(Icons.check_circle, color: Colors.green)
+                  //         : Icon(Icons.error_outline, color: Colors.red),
+                  // helperText: _isVerifyingEmail
+                  //     ? 'Sending verification email...'
+                  //     : _isEmailVerified
+                  //         ? 'Email verified'
+                  //         : 'Email not verified',
+                  // helperStyle: TextStyle(
+                  //   color: _isEmailVerified ? Colors.green : Colors.red,
+                  // ),
+                ),
 
-                    // _verifyEmail(email); // Send email verification
-                    _registerAsStudent(email); // Register as student
+                // onChanged: (email) {
+                //   setState(() {
+                //     _isEmailVerified = false;
+                //   });
+                // },
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                onChanged: _checkPasswordStrength,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: _passwordController.text.isNotEmpty
+                      ? Icon(
+                          _isPasswordStrong
+                              ? Icons.check_circle
+                              : Icons.error_outline,
+                          color: _isPasswordStrong ? Colors.green : Colors.red,
+                        )
+                      : null,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Are you an admin?'),
+                  Checkbox(
+                    value: _isAdmin,
+                    onChanged: (value) {
+                      setState(() {
+                        _isAdmin = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.redAccent, // Use red accent color
+                  onPrimary: Colors.white, // Text color
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+                onPressed: () {
+                  if (_isAdmin) {
+                    _showSecurityPopupDialog();
                   } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Weak Password'),
-                        content: Text('Please choose a strong password.'),
-                        actions: <Widget>[
-                          TextButton(
-                            child: Text('OK'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      ),
-                    );
+                    if (_isPasswordStrong) {
+                      final email = _emailController.text;
+
+                      // _verifyEmail(email); // Send email verification
+                      _registerAsStudent(email); // Register as student
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Weak Password'),
+                          content: Text('Please choose a strong password.'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
-                }
-              },
-              child: Text('Register'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
-              child: Text('Already a user? Login here'),
-            ),
-          ],
+                },
+                child: Text('Register'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                },
+                child: Text(
+                  'Already a user? Login here',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, bottom: 20, top: 220),
+                child: Center(
+                  child: Text(
+                      'Note:if u are loginig in as a admin please make sure you know security key',
+                      style: GoogleFonts.merriweather(
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 169, 169, 170),
+                          fontSize: 10)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

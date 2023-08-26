@@ -44,11 +44,13 @@ class _ReviewPageState extends State<ReviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Review This Equipment'),
+        backgroundColor: Colors.redAccent,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -58,6 +60,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     icon: Icon(
                       _rating >= i ? Icons.star : Icons.star_outline,
                       color: Colors.amber,
+                      size: 50,
                     ),
                     onPressed: () {
                       setState(() {
@@ -67,7 +70,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 30),
             TextField(
               decoration: InputDecoration(
                 labelText: 'Review Description',
@@ -80,8 +83,13 @@ class _ReviewPageState extends State<ReviewPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 30),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.redAccent, // Use red accent color
+                onPrimary: Colors.white, // Text color
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
               onPressed: _submitReview,
               child: Text('Submit Review'),
             ),

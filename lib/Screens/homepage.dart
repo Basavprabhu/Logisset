@@ -251,17 +251,22 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 0, bottom: 20),
+            padding: const EdgeInsets.only(bottom: 5),
             child: Expanded(
               child: Text('NAME: $name',
                   style: GoogleFonts.lora(
-                      fontSize: 30, fontWeight: FontWeight.bold)),
+                      fontSize: 20, fontWeight: FontWeight.bold)),
             ),
           ),
           // Divider(
           //   thickness: 3,
           //   color: Colors.black,
           // ),
+          CustomPaint(
+            size: Size(250, 0.5),
+            painter: LinePainter(),
+          ),
+
           Row(
             children: [
               Padding(
@@ -272,16 +277,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     'TIME: ${subNode['subNodeData']['time']}\n'
                     'BATTERY: ${subNode['subNodeData']['battery']} %',
                     style: GoogleFonts.teko(
-                        fontSize: 25,
+                        fontSize: 15,
                         letterSpacing: 1,
-                        fontWeight: FontWeight.w200)),
+                        fontWeight: FontWeight.w500)),
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.only(top: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -289,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: const EdgeInsets.only(right: 10),
                             child: Text(
                               "Turn off the device",
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(fontSize: 13),
                             ),
                           ),
                           FutureBuilder(
@@ -304,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               } else {
                                 bool powerStatus = snapshot.data == 'on';
                                 return Padding(
-                                  padding: const EdgeInsets.only(left: 50),
+                                  padding: const EdgeInsets.only(left: 30),
                                   child: CupertinoSwitch(
                                     value: powerStatus,
                                     onChanged: (newValue) {
@@ -320,13 +325,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 15),
+                      padding: const EdgeInsets.only(right: 0),
                       child: TextButton(
                         onPressed: () => _openDescriptionPage(name),
                         child: Text(
                           'Add Description',
                           style: GoogleFonts.overpass(
-                              fontWeight: FontWeight.w800, fontSize: 18),
+                              fontWeight: FontWeight.w800, fontSize: 12),
                         ),
                       ),
                     )
@@ -478,6 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 244, 242, 236),
       appBar: AppBar(
         title: Center(
             child: Text('ADMIN PAGE', style: TextStyle(color: Colors.white))),
@@ -564,12 +570,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: AnimatedContainer(
                           duration: Duration(milliseconds: 500),
                           // margin: EdgeInsets.symmetric(vertical: 4.0),
-                          padding: EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(35.0),
-                            border:
-                                Border.all(width: 2, color: Colors.redAccent),
+                            border: Border.all(
+                                width: 2,
+                                color: Color.fromARGB(255, 236, 89, 89)),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black54,
@@ -692,6 +699,25 @@ class _HomeScreenState extends State<HomeScreen> {
           .length;
     }
     return 1;
+  }
+}
+
+class LinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = Colors.black26
+      ..strokeWidth = 1.5;
+
+    final Offset start = Offset(0, size.height);
+    final Offset end = Offset(size.width, size.height);
+
+    canvas.drawLine(start, end, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
 
