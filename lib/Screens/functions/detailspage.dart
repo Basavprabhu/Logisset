@@ -70,6 +70,7 @@ class _DetailsPageState extends State<DetailsPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text('Asset Details'),
+              backgroundColor: Colors.redAccent,
             ),
             body: Center(
               child: CircularProgressIndicator(),
@@ -79,6 +80,7 @@ class _DetailsPageState extends State<DetailsPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text('Asset Details'),
+              backgroundColor: Colors.redAccent,
             ),
             body: Center(
               child: Text('Error: ${snapshot.error}'),
@@ -88,6 +90,7 @@ class _DetailsPageState extends State<DetailsPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text('Asset Details'),
+              backgroundColor: Colors.redAccent,
             ),
             body: Center(
               child: Text('No data available'),
@@ -98,6 +101,7 @@ class _DetailsPageState extends State<DetailsPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text('Asset Details'),
+              backgroundColor: Colors.redAccent,
               actions: [
                 IconButton(
                   icon: Icon(Icons.rate_review_sharp),

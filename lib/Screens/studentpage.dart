@@ -25,17 +25,17 @@ class _StudentPageState extends State<StudentPage> {
   String? selectedGroup;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future<void> _logout(BuildContext context) async {
-    try {
-      await _auth.signOut();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    } catch (e) {
-      print('Error during logout: $e');
-      // Handle error, show a message to the user, etc.
-    }
-  }
+  // Future<void> _logout(BuildContext context) async {
+  //   try {
+  //     await _auth.signOut();
+  //     Navigator.of(context).pushReplacement(
+  //       MaterialPageRoute(builder: (context) => LoginPage()),
+  //     );
+  //   } catch (e) {
+  //     print('Error during logout: $e');
+  //     // Handle error, show a message to the user, etc.
+  //   }
+  // }
 
   @override
   void initState() {
@@ -132,12 +132,12 @@ class _StudentPageState extends State<StudentPage> {
       appBar: AppBar(
         title: Text('Asset Status', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.redAccent,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.logout),
+        //     onPressed: () => _logout(context),
+        //   ),
+        // ],
       ),
       body: Column(
         children: [
