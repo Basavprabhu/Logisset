@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:logisset/auth/login.dart';
 
 import 'functions/descriptionpage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -245,6 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Card _buildAssetTile(Map<dynamic, dynamic> subNode) {
     String name = subNode['subNodeData']['name'].toString();
+
     String address = subNode['address'].toString();
 
     return Card(
@@ -298,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           FutureBuilder(
-                            future: _getPowerStatusFromDatabase(
+                            future: _getPowerStatusFromFirestore(
                                 name), // Fetch power status from mainCollection->name->power
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
@@ -313,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: CupertinoSwitch(
                                     value: powerStatus,
                                     onChanged: (newValue) {
-                                      _updatePowerStatus(name,
+                                      _updatePowerStatusFirestore(name,
                                           newValue); // Update power status in subnode and mainCollection
                                     },
                                   ),
@@ -417,18 +419,25 @@ class _HomeScreenState extends State<HomeScreen> {
   //   );
   // }
 
-  Future<String> _getPowerStatusFromDatabase(String assetName) async {
-    DatabaseEvent snapshot = await _databaseRef
-        .child('device_power')
-        .child(assetName)
-        .child('power')
-        .once();
-    return snapshot.snapshot.value.toString();
+  Future<String> _getPowerStatusFromFirestore(String assetName) async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('power')
+        .doc(assetName)
+        .get();
+
+    if (snapshot.exists) {
+      Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+      if (data != null && data.containsKey('status')) {
+        return data['status'].toString();
+      }
+    }
+    return 'off'; // Default to off if document doesn't exist or status is not found
   }
 
-  Future<void> _updatePowerStatus(String assetName, bool newValue) async {
-    DatabaseReference assetRef =
-        _databaseRef.child('device_power').child(assetName);
+  Future<void> _updatePowerStatusFirestore(
+      String assetName, bool newValue) async {
+    DocumentReference assetRef =
+        FirebaseFirestore.instance.collection('power').doc(assetName);
 
     if (!newValue) {
       bool confirm = await showDialog(
@@ -460,8 +469,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    // Update the power status in the Realtime Database
-    await assetRef.update({'power': newValue ? 'on' : 'off'});
+    // Update the power status in Firestore
+    await assetRef.set({'status': newValue ? 'on' : 'off'});
 
     setState(() {
       // Update the switch state visually

@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
 import 'package:logisset/auth/login.dart';
 
 import 'functions/descriptionpage.dart';
 import 'functions/detailspage.dart';
+import 'functions/reviewdisplay.dart';
 
 class StudentPage extends StatefulWidget {
   @override
@@ -103,26 +105,64 @@ class _StudentPageState extends State<StudentPage> {
     );
   }
 
-  ListTile _buildAssetTile(Map<dynamic, dynamic> subNode) {
+  Card _buildAssetTile(Map<dynamic, dynamic> subNode) {
     String name = subNode['subNodeData']['name'].toString();
+
     String address = subNode['address'].toString();
 
-    return ListTile(
-      title: Text('Name: $name', style: TextStyle(fontSize: 18)),
-      subtitle: Text(
-        'Address: $address\n',
-        // 'RSSI: ${subNode['subNodeData']['rssi']}\n'
-        // 'Time: ${subNode['subNodeData']['time']}\n'
-        // 'Battery: ${subNode['subNodeData']['battery']} %',
-        style: TextStyle(fontSize: 16),
+    return Card(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 5),
+            child: Expanded(
+              child: Text('NAME: $name',
+                  style: GoogleFonts.lora(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          // Divider(
+          //   thickness: 3,
+          //   color: Colors.black,
+          // ),
+          CustomPaint(
+            size: Size(250, 0.5),
+            painter: LinePainter(),
+          ),
+
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 10, top: 30),
+                child: Text('ADDRESS: $address\n',
+                    style: GoogleFonts.teko(
+                        fontSize: 20,
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.w500)),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    ReviewWidget(assetName: name),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 50),
+                      child: TextButton(
+                        onPressed: () => _openDetailsPage(name),
+                        child: Text(
+                          'View more',
+                          style: GoogleFonts.overpass(
+                              fontWeight: FontWeight.w800, fontSize: 12),
+                        ),
+                      ),
+                    ) // Add the ReviewWidget here
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      trailing: TextButton(
-        onPressed: () => _openDetailsPage(name),
-        child: Text('View more'),
-      ),
-      onTap: () async {
-        // ... (rest of the onTap function)
-      },
     );
   }
 
@@ -130,7 +170,8 @@ class _StudentPageState extends State<StudentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Asset Status', style: TextStyle(color: Colors.white)),
+        title: Center(
+            child: Text('STUDENT PAGE', style: TextStyle(color: Colors.white))),
         backgroundColor: Colors.redAccent,
         // actions: [
         //   IconButton(
@@ -150,12 +191,12 @@ class _StudentPageState extends State<StudentPage> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search by asset name',
+                suffixIcon: Icon(Icons.search_sharp),
+                hintText: 'Search by asset name,location',
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(40.0),
                 ),
               ),
             ),
@@ -209,22 +250,28 @@ class _StudentPageState extends State<StudentPage> {
                       }
 
                       // Display the subnode information in list view
-                      return AnimatedContainer(
-                        duration: Duration(milliseconds: 500),
-                        margin: EdgeInsets.symmetric(vertical: 4.0),
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              offset: Offset(0, 2),
-                              blurRadius: 2.0,
-                            ),
-                          ],
+                      return Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: AnimatedContainer(
+                          duration: Duration(milliseconds: 500),
+                          margin: EdgeInsets.symmetric(vertical: 4.0),
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(35.0),
+                            border: Border.all(
+                                width: 2,
+                                color: Color.fromARGB(255, 236, 89, 89)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black54,
+                                offset: Offset(10, 10),
+                                blurRadius: 10.0,
+                              ),
+                            ],
+                          ),
+                          child: _buildAssetTile(subNodeList[index]),
                         ),
-                        child: _buildAssetTile(subNodeList[index]),
                       );
                     },
                   )

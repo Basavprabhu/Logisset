@@ -8,7 +8,6 @@ import 'package:logisset/auth/register.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import 'Screens/studentpage.dart';
 import 'auth/login.dart';
 import 'firebase_options.dart';
 
@@ -44,59 +43,58 @@ void main() async {
     sound: true,
   );
 
-  // Subscribe to topics
   await FirebaseMessaging.instance.subscribeToTopic('asset_triggered');
   await FirebaseMessaging.instance.subscribeToTopic('asset_moved');
   await FirebaseMessaging.instance.subscribeToTopic('battery_low');
 }
 
 class MyApp extends StatelessWidget {
-  //     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-//       RemoteNotification? notification = message.notification;
-//       AndroidNotification? android = message.notification?.android;
-//       if (notification != null && android != null) {
-//         flutterLocalNotificationsPlugin.show(
-//           notification.hashCode,
-//           notification.title,
-//           notification.body,
-//           NotificationDetails(
-//             android: AndroidNotificationDetails(
-//               channel.id,
-//               channel.name,
-//               color: Colors.blue,
-//               playSound: true,
-//               icon: '@mipmap/ic_launcher',
-//             ),
-//           ),
-//         );
-//       }
-//     });
-
-//     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-//       print('A new onMessageOpenedApp event was published!');
-//       RemoteNotification? notification = message.notification;
-//       AndroidNotification? android = message.notification?.android;
-//       if (notification != null && android != null) {
-//         showDialog(
-//           context: context,
-//           builder: (_) {
-//             return AlertDialog(
-//               title: Text(notification.title!),
-//               content: SingleChildScrollView(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [Text(notification.body!)],
-//                 ),
-//               ),
-//             );
-//           },
-//         );
-//       }
-//     });
-//   }
-
   @override
   Widget build(BuildContext context) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channelDescription: channel.description,
+              importance: channel.importance,
+              playSound: channel.playSound,
+              icon: android.smallIcon,
+            ),
+          ),
+        );
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text(notification.title!),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [Text(notification.body!)],
+                ),
+              ),
+            );
+          },
+        );
+      }
+    });
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Logisset',
@@ -114,21 +112,17 @@ class AuthenticationWrapper extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      // User is logged in
       return FutureBuilder<DocumentSnapshot>(
         future:
             FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // Firestore data is loading
             return CircularProgressIndicator();
           } else if (snapshot.hasError) {
-            // Handle error
             return Text('Error loading user data');
           } else if (snapshot.hasData) {
             if (snapshot.data!.exists) {
-              String role = snapshot.data!['role'] ??
-                  ''; // Access role field with a default value
+              String role = snapshot.data!['role'] ?? '';
               if (role == 'admin' && user.emailVerified) {
                 return MainPageView();
               } else if (role == 'student') {
@@ -137,24 +131,18 @@ class AuthenticationWrapper extends StatelessWidget {
                 return LoginPage();
               }
             } else {
-              // User document exists but doesn't have 'role' field (potential issue)
               return RegisterPage();
             }
           } else {
-            // User document not found (potential issue)
             return RegisterPage();
           }
         },
       );
     } else {
-      // User is not logged in
       return LoginPage();
     }
   }
 }
-
-
-
 
 
 

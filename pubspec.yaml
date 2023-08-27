@@ -58,6 +58,8 @@ dependencies:
   flutter_blue: ^0.8.0
   flutter_bluetooth_serial: ^0.4.0
   google_fonts: ^4.0.4
+  flutter_spinkit: ^5.2.0
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'package:logisset/Screens/historypage.dart';
 import 'package:logisset/Screens/homepage.dart';
 import 'package:logisset/Screens/scanpage.dart';
 import 'package:logisset/Screens/studentpage.dart';
+import 'package:logisset/Screens/studentuserpage.dart';
 import 'package:logisset/Screens/userpage.dart';
 
 class StudentMainPageView extends StatefulWidget {
@@ -16,9 +17,7 @@ class StudentMainPageView extends StatefulWidget {
 class _StudentMainPageViewState extends State<StudentMainPageView> {
   List pages = [
     StudentPage(),
-  
-  
-    UserScreen(),
+    StudentUserScreen(),
   ];
 
   int currentIndex = 0;
@@ -42,7 +41,6 @@ class _StudentMainPageViewState extends State<StudentMainPageView> {
             label: 'Home',
             backgroundColor: Colors.redAccent,
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
             label: 'Profile',

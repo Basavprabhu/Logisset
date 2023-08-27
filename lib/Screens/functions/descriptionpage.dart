@@ -25,6 +25,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
   File? _image;
   final picker = ImagePicker();
 
+  bool _uploading = false;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _saveDescription() async {
@@ -79,14 +81,65 @@ class _DescriptionPageState extends State<DescriptionPage> {
     });
   }
 
-  Future<String> uploadImageToFirestore() async {
-    // Upload the image to Firestore storage and return the download URL
-    // Replace 'images' with your desired storage bucket path
-    Reference ref =
-        FirebaseStorage.instance.ref().child('images/${widget.assetName}.jpg');
-    UploadTask uploadTask = ref.putFile(_image!);
-    TaskSnapshot storageTaskSnapshot = await uploadTask;
-    return await storageTaskSnapshot.ref.getDownloadURL();
+  Future<void> _uploadImageToFirestore() async {
+    setState(() {
+      _uploading = true;
+    });
+
+    try {
+      Reference ref = FirebaseStorage.instance
+          .ref()
+          .child('images/${widget.assetName}.jpg');
+      UploadTask uploadTask = ref.putFile(_image!);
+      TaskSnapshot storageTaskSnapshot = await uploadTask;
+      String downloadURL = await storageTaskSnapshot.ref.getDownloadURL();
+
+      setState(() {
+        _uploading = false;
+      });
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Image Uploaded'),
+            content: Text('The image was uploaded successfully.'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _uploading = false;
+      });
+
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('An error occurred while uploading the image.'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -118,7 +171,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
               TextField(
                 controller: _descriptionController,
                 maxLines: 4,
-                maxLength: 2000, // Set the maximum character limit
+                maxLength: 5000, // Set the maximum character limit
                 decoration: InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
@@ -193,13 +246,17 @@ class _DescriptionPageState extends State<DescriptionPage> {
               // ... Similar code for other segmented controls ...
 
               SizedBox(height: 16),
+              _image != null ? Image.file(_image!) : Text('No image selected'),
               ElevatedButton(
                 onPressed: _getImage,
-                child: Text('Pick Image from Gallery'),
-                style: ElevatedButton.styleFrom(primary: Colors.redAccent),
+                child: Text('Select Image'),
               ),
-
-              _image != null ? Image.file(_image!) : Container(),
+              ElevatedButton(
+                onPressed: _uploading ? null : _uploadImageToFirestore,
+                child: _uploading
+                    ? CircularProgressIndicator() // Show progress indicator
+                    : Text('Upload Image'),
+              ),
               SizedBox(height: 16),
               Text('Please add https:// to your url:'),
               SizedBox(

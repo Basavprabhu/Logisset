@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 import 'login.dart';
 
@@ -21,7 +22,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   TextEditingController _departmentController = TextEditingController();
   TextEditingController _usnController = TextEditingController();
   TextEditingController _semesterController = TextEditingController();
+  TextEditingController _contactController = TextEditingController();
   bool _agreeToTerms = false;
+
+  String selectedCountryCode = '+1';
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -155,6 +159,24 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                 ),
               ),
             ),
+            SizedBox(width: 10),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: _contactController,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly
+                ], // Allow only digits
+                maxLength: 10,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
             CheckboxListTile(
               title: Text(
                 'I agree to all terms and conditions.',
@@ -187,6 +209,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                     'department': _departmentController.text,
                     'usn': _usnController.text,
                     'semester': _semesterController.text,
+                    'contact_no': _contactController.text,
                   });
 
                   // User? user = FirebaseAuth.instance.currentUser;
