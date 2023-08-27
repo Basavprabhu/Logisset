@@ -78,8 +78,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('login',
-            style: GoogleFonts.lobster(fontSize: 35, color: Colors.black87)),
+        title: Text('LOGIN',
+            style: GoogleFonts.roboto(
+                fontSize: 35,
+                color: Colors.white,
+                fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),

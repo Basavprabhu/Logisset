@@ -20,8 +20,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   TextEditingController _lastNameController = TextEditingController();
   TextEditingController _genderController = TextEditingController();
   TextEditingController _departmentController = TextEditingController();
-  TextEditingController _usnController = TextEditingController();
-  TextEditingController _semesterController = TextEditingController();
+  TextEditingController _labController = TextEditingController();
+  TextEditingController _qualificationController = TextEditingController();
   TextEditingController _contactController = TextEditingController();
   bool _agreeToTerms = false;
 
@@ -126,7 +126,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: TextField(
-                controller: _semesterController,
+                controller: _qualificationController,
                 decoration: InputDecoration(
                   labelText: 'Qualification',
                   border: OutlineInputBorder(),
@@ -150,7 +150,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: TextField(
-                controller: _usnController,
+                controller: _labController,
                 decoration: InputDecoration(
                   labelText: 'Lab',
                   border: OutlineInputBorder(),
@@ -207,8 +207,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         : null,
                     'gender': _genderController.text,
                     'department': _departmentController.text,
-                    'usn': _usnController.text,
-                    'semester': _semesterController.text,
+                    'lab': _labController.text,
+                    'qualification': _qualificationController.text,
                     'contact_no': _contactController.text,
                   });
 

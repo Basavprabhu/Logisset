@@ -262,7 +262,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Text(
             'REGISTER',
             style: GoogleFonts.kanit(
-                fontSize: 25, color: Colors.black, fontWeight: FontWeight.w400),
+                fontSize: 25, color: Colors.white, fontWeight: FontWeight.w400),
           ),
         ),
         backgroundColor: Colors.redAccent,

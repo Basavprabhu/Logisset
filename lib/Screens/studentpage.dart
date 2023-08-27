@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:logisset/auth/login.dart';
 
@@ -107,38 +108,125 @@ class _StudentPageState extends State<StudentPage> {
 
   Card _buildAssetTile(Map<dynamic, dynamic> subNode) {
     String name = subNode['subNodeData']['name'].toString();
-
     String address = subNode['address'].toString();
 
     return Card(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Expanded(
-              child: Text('NAME: $name',
-                  style: GoogleFonts.lora(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
+          FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('asset_descriptions')
+                .doc(name) // Assuming the document ID is the asset name
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error loading asset data');
+              } else if (snapshot.hasData && snapshot.data!.exists) {
+                String assetType = snapshot.data!['assetType'] ?? 'N/A';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Text(' ${assetType.toUpperCase()}',
+                      style: GoogleFonts.lora(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                );
+              } else {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Text('NAME: $name',
+                      style: GoogleFonts.lora(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                );
+              }
+            },
           ),
-          // Divider(
-          //   thickness: 3,
-          //   color: Colors.black,
-          // ),
           CustomPaint(
             size: Size(250, 0.5),
             painter: LinePainter(),
           ),
-
           Row(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, top: 30),
-                child: Text('ADDRESS: $address\n',
-                    style: GoogleFonts.teko(
-                        fontSize: 20,
-                        letterSpacing: 1,
-                        fontWeight: FontWeight.w500)),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10, top: 30),
+                    child: Text('ADDRESS: $address\n',
+                        style: GoogleFonts.teko(
+                            fontSize: 20,
+                            letterSpacing: 1,
+                            fontWeight: FontWeight.w500)),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      String labAddress = subNode['address'].toString();
+                      String userEmail =
+                          FirebaseAuth.instance.currentUser?.email ?? '';
+
+                      QuerySnapshot labAssistantsSnapshot =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .where('lab', isEqualTo: labAddress)
+                              .get();
+
+                      if (labAssistantsSnapshot.docs.isNotEmpty) {
+                        final labAssistantData =
+                            labAssistantsSnapshot.docs.first.data();
+
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Lab Assistant Information'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'First Name: ${labAssistantData is Map ? labAssistantData['first_name'] ?? 'N/A' : 'N/A'}'),
+                                  Text(
+                                      'Last Name: ${labAssistantData is Map ? labAssistantData['last_name'] ?? 'N/A' : 'N/A'}'),
+                                  Text(
+                                      'Qualification: ${labAssistantData is Map ? labAssistantData['qualification'] ?? 'N/A' : 'N/A'}'),
+                                  Text(
+                                      'Department: ${labAssistantData is Map ? labAssistantData['department'] ?? 'N/A' : 'N/A'}'),
+                                  Text('Lab: $labAddress'),
+                                  Text('Email: $userEmail'),
+                                  Text(
+                                      'Contact No: ${labAssistantData is Map ? labAssistantData['contact_no'] ?? 'N/A' : 'N/A'}'),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Close'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('No Lab Assistant found for this lab.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Contact Lab incharge',
+                        style: GoogleFonts.overpass(
+                            fontWeight: FontWeight.w800, fontSize: 12),
+                      ),
+                    ),
+                  )
+                ],
               ),
               Expanded(
                 child: Column(
@@ -150,12 +238,12 @@ class _StudentPageState extends State<StudentPage> {
                       child: TextButton(
                         onPressed: () => _openDetailsPage(name),
                         child: Text(
-                          'View more',
+                          'About the equipment',
                           style: GoogleFonts.overpass(
                               fontWeight: FontWeight.w800, fontSize: 12),
                         ),
                       ),
-                    ) // Add the ReviewWidget here
+                    )
                   ],
                 ),
               ),
