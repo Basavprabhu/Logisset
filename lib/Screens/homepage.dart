@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -299,9 +300,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(fontSize: 13),
                             ),
                           ),
-                          FutureBuilder(
-                            future: _getPowerStatusFromFirestore(
-                                name), // Fetch power status from mainCollection->name->power
+                          FutureBuilder<int>(
+                            future: _getPowerStatusFromDatabase(
+                                name), // Replace with your asset name
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -309,16 +310,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               } else if (snapshot.hasError) {
                                 return Text('Error: ${snapshot.error}');
                               } else {
-                                bool powerStatus = snapshot.data == 'on';
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 30),
-                                  child: CupertinoSwitch(
-                                    value: powerStatus,
-                                    onChanged: (newValue) {
-                                      _updatePowerStatusFirestore(name,
-                                          newValue); // Update power status in subnode and mainCollection
-                                    },
-                                  ),
+                                int powerStatus = snapshot.data ??
+                                    0; // Default to 0 if data is null
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CupertinoSwitch(
+                                      value: powerStatus == 1,
+                                      onChanged: (newValue) {
+                                        _updatePowerStatusDatabase(
+                                            name,
+                                            newValue
+                                                ? 1
+                                                : 0); // Replace with your asset name
+                                      },
+                                    ),
+                                  ],
                                 );
                               }
                             },
@@ -418,75 +425,49 @@ class _HomeScreenState extends State<HomeScreen> {
   //     ),
   //   );
   // }
+  Future<int> _getPowerStatusFromDatabase(String assetName) async {
+    try {
+      DatabaseReference secondaryDatabase = FirebaseDatabase.instanceFor(
+        app: Firebase.app('secondary'),
+      ).ref();
 
-  Future<String> _getPowerStatusFromFirestore(String assetName) async {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection('power')
-        .doc(assetName)
-        .get();
+      DatabaseEvent snapshot =
+          await secondaryDatabase.child(assetName).child('data').once();
 
-    if (snapshot.exists) {
-      Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
-      if (data != null && data.containsKey('status')) {
-        return data['status'].toString();
+      if (snapshot.snapshot.value != null) {
+        return snapshot.snapshot.value as int;
+      } else {
+        print('No data found.');
+        return 1; // Default to off if data doesn't exist
       }
+    } catch (error) {
+      print('Error fetching data: $error');
+      return 1; // Default to off if an error occurs
     }
-    return 'off'; // Default to off if document doesn't exist or status is not found
   }
 
-  Future<void> _updatePowerStatusFirestore(
-      String assetName, bool newValue) async {
-    DocumentReference assetRef =
-        FirebaseFirestore.instance.collection('power').doc(assetName);
+  Future<void> _updatePowerStatusDatabase(
+      String assetName, int newValue) async {
+    try {
+      DatabaseReference secondaryDatabase = FirebaseDatabase.instanceFor(
+        app: Firebase.app('secondary'),
+      ).ref();
+      await secondaryDatabase.child(assetName).update({'data': newValue});
 
-    if (!newValue) {
-      bool confirm = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Confirm Power Off'),
-            content: Text('Are you sure you want to turn off this device?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false); // Cancel turning off
-                },
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true); // Confirm turning off
-                },
-                child: Text('Confirm'),
-              ),
-            ],
-          );
-        },
-      );
-
-      if (confirm == false) {
-        return; // User canceled, do not proceed with turning off
-      }
-    }
-
-    // Update the power status in Firestore
-    await assetRef.set({'status': newValue ? 'on' : 'off'});
-
-    setState(() {
-      // Update the switch state visually
-      subNodeList = subNodeList.map((subNode) {
-        if (subNode['subNodeData']['name'] == assetName) {
-          return {
-            ...subNode,
-            'subNodeData': {
-              ...subNode['subNodeData'],
-              'power': newValue ? 'on' : 'off',
-            },
-          };
+      // Update the UI state
+      setState(() {
+        // Find the corresponding subNode in the list and update its 'data' value
+        for (int i = 0; i < subNodeList.length; i++) {
+          if (subNodeList[i]['assetname'] == assetName) {
+            subNodeList[i]['data'] = newValue;
+            break; // Exit loop once the update is done
+          }
         }
-        return subNode;
-      }).toList();
-    });
+      });
+    } catch (error) {
+      print('Error updating data: $error');
+      // Handle the error, show a message to the user, etc.
+    }
   }
 
   @override
