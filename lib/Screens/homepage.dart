@@ -307,7 +307,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return CircularProgressIndicator();
+                                return Text(
+                                  'loading',
+                                  style: TextStyle(fontSize: 33),
+                                );
                               } else if (snapshot.hasError) {
                                 return Text('Error: ${snapshot.error}');
                               } else {

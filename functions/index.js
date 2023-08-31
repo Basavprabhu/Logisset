@@ -4,13 +4,14 @@ admin.initializeApp();
 
 const firestore = admin.firestore();
 
-exports.observeTriggeredStatus = functions.database.ref("/{mainNode}/{subNode}/triggered")
+exports.observeTriggeredStatus = functions.database.ref("/{rootNode}/{mainNode}/{subNode}/triggered")
   .onUpdate(async (change, context) => {
     const triggeredAfter = change.after.val();
     const triggeredBefore = change.before.val();
 
     // Check if the 'triggered' field was changed to true
     if (triggeredAfter === true && triggeredAfter !== triggeredBefore) {
+      const rootNode=context.params.rootNode;
       const mainNode = context.params.mainNode;
       const subNode = context.params.subNode;
       const eventTime = new Date().toLocaleString('en-IN', {
@@ -24,7 +25,7 @@ exports.observeTriggeredStatus = functions.database.ref("/{mainNode}/{subNode}/t
       });
 
       try {
-        const assetRef = admin.database().ref(`/${mainNode}/${subNode}`);
+        const assetRef = admin.database().ref(`/${rootNode}/${mainNode}/${subNode}`);
         const snapshot = await assetRef.once('value');
         const { name } = snapshot.val();
 
@@ -68,18 +69,19 @@ exports.observeTriggeredStatus = functions.database.ref("/{mainNode}/{subNode}/t
 
 
 
-  exports.observeBatteryStatus = functions.database.ref("/{mainNode}/{subNode}/battery")
+  exports.observeBatteryStatus = functions.database.ref("/{rootNode}/{mainNode}/{subNode}/battery")
   .onUpdate(async (change, context) => {
     const batteryLevel = change.after.val();
 
     // Check if the battery level falls below 10
     if (batteryLevel < 10) {
+      const rootNode=context.params.rootNode;
       const mainNode = context.params.mainNode;
       const subNode = context.params.subNode;
       
 
       try {
-        const assetRef = admin.database().ref(`/${mainNode}/${subNode}`);
+        const assetRef = admin.database().ref(`/${rootNode}/${mainNode}/${subNode}`);
         const snapshot = await assetRef.once('value');
         const { name } = snapshot.val();
 
