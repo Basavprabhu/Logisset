@@ -16,7 +16,6 @@ class _MainPageViewState extends State<MainPageView> {
   List pages = [
     HomeScreen(),
     HistoryScreen(),
-    ScanPage(),
     UserScreen(),
   ];
 
@@ -44,11 +43,6 @@ class _MainPageViewState extends State<MainPageView> {
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'History',
-            backgroundColor: Colors.redAccent,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.scanner),
-            label: 'Scan',
             backgroundColor: Colors.redAccent,
           ),
           BottomNavigationBarItem(

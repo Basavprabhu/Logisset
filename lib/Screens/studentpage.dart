@@ -44,7 +44,7 @@ class _StudentPageState extends State<StudentPage> {
   void initState() {
     super.initState();
     // Get a reference to the root node of your Realtime Database
-    _databaseRef = FirebaseDatabase.instance.reference();
+    _databaseRef = FirebaseDatabase.instance.ref().child('assets');
 
     // Listen for changes in the database
     _databaseRef.onValue.listen((event) {

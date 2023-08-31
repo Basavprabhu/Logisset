@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
+import 'package:intl/intl.dart';
 
 import 'package:logisset/auth/login.dart';
 
@@ -28,23 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
   String? selectedGroup;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future<void> _logout(BuildContext context) async {
-    try {
-      await _auth.signOut();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    } catch (e) {
-      print('Error during logout: $e');
-      // Handle error, show a message to the user, etc.
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     // Get a reference to the root node of your Realtime Database
-    _databaseRef = FirebaseDatabase.instance.reference();
+    _databaseRef = FirebaseDatabase.instance.ref().child('assets');
 
     // Listen for changes in the database
     _databaseRef.onValue.listen((event) {
@@ -236,6 +226,17 @@ class _HomeScreenState extends State<HomeScreen> {
   //   return completer.future;
   // }
 
+  String _getCurrentTime() {
+    // Get the current time
+    DateTime currentTime = DateTime.now();
+
+    // Format the current time as desired
+    String formattedTime =
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(currentTime);
+
+    return formattedTime;
+  }
+
   Future<void> _openDescriptionPage(String assetName) async {
     await Navigator.push(
       context,
@@ -277,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                     'ADDRESS: $address\n'
                     'RSSI: ${subNode['subNodeData']['rssi']}\n'
-                    'TIME: ${subNode['subNodeData']['time']}\n'
+                    'TIME: ${_getCurrentTime()}\n'
                     'BATTERY: ${subNode['subNodeData']['battery']} %',
                     style: GoogleFonts.teko(
                         fontSize: 15,
@@ -427,9 +428,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // }
   Future<int> _getPowerStatusFromDatabase(String assetName) async {
     try {
-      DatabaseReference secondaryDatabase = FirebaseDatabase.instanceFor(
-        app: Firebase.app('secondary'),
-      ).ref();
+      DatabaseReference secondaryDatabase = FirebaseDatabase.instance.ref();
+      // app: Firebase.app('secondary'),
 
       DatabaseEvent snapshot =
           await secondaryDatabase.child(assetName).child('data').once();
@@ -449,9 +449,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _updatePowerStatusDatabase(
       String assetName, int newValue) async {
     try {
-      DatabaseReference secondaryDatabase = FirebaseDatabase.instanceFor(
-        app: Firebase.app('secondary'),
-      ).ref();
+      DatabaseReference secondaryDatabase = FirebaseDatabase.instance.ref();
+      // app: Firebase.app('secondary'),
+
       await secondaryDatabase.child(assetName).update({'data': newValue});
 
       // Update the UI state
