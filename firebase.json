@@ -9,7 +9,21 @@
         "firebase-debug.log",
         "firebase-debug.*.log"
       ],
-      "predeploy":false
+      "predeploy": false
     }
-  ]
+  ],
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
 }
